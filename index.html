@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경쟁자 시점 조언기 — 솔로몬의 역설</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);min-height:100vh;color:#e0e0e0;padding:20px}
+.container{max-width:800px;margin:0 auto}
+h1{text-align:center;font-size:1.8rem;margin-bottom:8px;color:#fff}
+.subtitle{text-align:center;color:#a0a0c0;margin-bottom:24px;font-size:.95rem}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.card h2{font-size:1.1rem;margin-bottom:12px;color:#e94560}
+label{display:block;font-size:.85rem;color:#b0b0d0;margin-bottom:4px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(0,0,0,.3);color:#e0e0e0;font-size:.95rem;margin-bottom:12px}
+textarea{min-height:100px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#e94560}
+.btn{display:inline-block;padding:10px 24px;border:none;border-radius:8px;cursor:pointer;font-size:.95rem;font-weight:600;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#e94560,#c0392b);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(233,69,96,.4)}
+.btn-secondary{background:rgba(255,255,255,.1);color:#e0e0e0;border:1px solid rgba(255,255,255,.2)}
+.btn-danger{background:rgba(231,76,60,.2);color:#e74c3c;border:1px solid rgba(231,76,60,.3)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.profile-card{border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s}
+.profile-card:hover{border-color:rgba(233,69,96,.5)}
+.profile-card.active{border-color:#e94560;background:rgba(233,69,96,.1)}
+.profile-card .icon{font-size:2rem;margin-bottom:6px}
+.profile-card .name{font-weight:700;font-size:.9rem}
+.profile-card .desc{font-size:.75rem;color:#888;margin-top:4px}
+.perspective{background:rgba(0,0,0,.2);border-left:3px solid #e94560;border-radius:0 8px 8px 0;padding:14px;margin-bottom:10px}
+.perspective .title{font-weight:700;color:#e94560;margin-bottom:6px;font-size:.9rem}
+.perspective .content{font-size:.85rem;line-height:1.6;color:#d0d0d0}
+.emotion-alert{background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.3);border-radius:8px;padding:12px;margin:10px 0;font-size:.85rem}
+.emotion-alert .word{display:inline-block;background:rgba(241,196,15,.2);color:#f1c40f;padding:2px 8px;border-radius:4px;margin:2px;font-size:.8rem}
+.emotion-alert .suggestion{display:block;margin-top:4px;color:#a0a0c0;font-size:.8rem}
+.history-item{background:rgba(0,0,0,.2);border-radius:8px;padding:12px;margin-bottom:8px;font-size:.85rem}
+.history-item .date{color:#e94560;font-size:.75rem}
+.empty{text-align:center;color:#666;padding:20px;font-size:.9rem}
+@media(max-width:600px){.profile-grid{grid-template-columns:1fr}h1{font-size:1.4rem}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚔️ 경쟁자 시점 조언기</h1>
+<p class="subtitle">가장 무서운 경쟁자의 눈으로 내 문제를 다시 보라</p>
+
+<div class="card">
+<h2>🤔 고민 상황 입력</h2>
+<textarea id="situation" placeholder="예: 우리 앱이 3개월째 사용자가 안 늘고 있어. 경쟁자가 너무 강해서 이길 수 있을지 불안해."></textarea>
+</div>
+
+<div class="card">
+<h2>👤 경쟁자 프로필 선택</h2>
+<div class="profile-grid">
+  <div class="profile-card active" data-profile="aggressive" onclick="selectProfile('aggressive')">
+    <div class="icon">🦈</div>
+    <div class="name">공격형</div>
+    <div class="desc">가격 공세, 빠른 복제, 공격적 마케팅</div>
+  </div>
+  <div class="profile-card" data-profile="cautious" onclick="selectProfile('cautious')">
+    <div class="icon">🐢</div>
+    <div class="name">신중형</div>
+    <div class="desc">품질 우선, 천천히 확장, 고객 충성도</div>
+  </div>
+  <div class="profile-card" data-profile="capital" onclick="selectProfile('capital')">
+    <div class="icon">🐘</div>
+    <div class="name">자본력형</div>
+    <div class="desc">대규모 투자, 인수합병, 자본으로 밀어붙이기</div>
+  </div>
+</div>
+</div>
+
+<div style="text-align:center;margin:16px 0">
+<button class="btn btn-primary" onclick="generate()">🔮 경쟁자 시점으로 재해석</button>
+</div>
+
+<div id="result"></div>
+
+<div class="card">
+<h2>📜 판단 기록</h2>
+<div id="history"></div>
+<div style="margin-top:12px;text-align:right">
+<button class="btn btn-danger btn-sm" onclick="clearHistory()">기록 전체 삭제</button>
+</div>
+</div>
+</div>
+
+<script>
+let selectedProfile = 'aggressive';
+
+const PROFILES = {
+  aggressive: {
+    name: '공격형 경쟁자',
+    icon: '🦈',
+    perspectives: [
+      {title:'가격 공격', template:'나는 당신의 제품을 50% 저렴하게 출시할 것이다. 당신은 가격을 낮출 것인가, 아니면 차별화로 버틸 것인가? 버틴다면 그 차별화가 정말 고객이 지불할 가치가 있는가?'},
+      {title:'빠른 복제', template:'나는 당신의 핵심 기능을 2주 안에 복제해서 출시할 것이다. 당신의 진짜 방어막은 기능이 아니라 무엇인가? 브랜드? 데이터? 커뮤니티?'},
+      {title:'마케팅 공세', template:'나는 당신의 타겟 고객에게 광고비의 3배를 쏟아부을 것이다. 당신은 어디에서 그를 이길 것인가? 그들이 닿지 않는 곳이 있는가?'}
+    ]
+  },
+  cautious: {
+    name: '신중형 경쟁자',
+    icon: '🐢',
+    perspectives: [
+      {title:'품질 우선', template:'나는 당신의 제품을 더 정교하게 만들 것이다. 당신의 제품에서 고객이 가장 불만을 느끼는 부분은 무엇인가? 그것을 먼저 고치지 않으면 나에게 밀린다.'},
+      {title:'고객 충성도', template:'나는 당신의 고객을 한 명씩 설득할 것이다. 당신의 고객이 당신을 선택한 진짜 이유는 무엇인가? 그 이유가 약해지면 고객은 나에게 간다.'},
+      {title:'천천히 확장', template:'나는 당신이 방치한 틈새 시장부터 먹을 것이다. 당신이 무시하는 고객 그룹이 있는가? 그들이 모이면 나의 기반이 된다.'}
+    ]
+  },
+  capital: {
+    name: '자본력형 경쟁자',
+    icon: '🐘',
+    perspectives: [
+      {title:'인수합병', template:'나는 당신의 협력사/공급사를 전부 인수할 것이다. 당신의 생태계에서 가장 약한 고리는 어디인가? 그 고리가 끊기면 당신은 어떻게 되는가?'},
+      {title:'자본 소진전', template:'나는 당신이 적자로 운영하는 동안 3배 자본을 들여 시장을 선점할 것이다. 당신의 자본이 몇 개월 버틸 수 있는가? 그 전에 수익을 내는 방법이 있는가?'},
+      {title:'인재 영입', template:'나는 당신의 핵심 인력을 2배 연봉으로 빼갈 것이다. 당신의 팀이 회사를 선택한 이유는 무엇인가? 돈 외에 무엇이 있는가?'}
+    ]
+  }
+};
+
+const EMOTION_WORDS = [
+  {word:'불안', neutral:'우려'},
+  {word:'두려움', neutral:'리스크'},
+  {word:'답답', neutral:'정체'},
+  {word:'화가', neutral:'불만'},
+  {word:'짜증', neutral:'비효율'},
+  {word:'절망', neutral:'한계'},
+  {word:'조급', neutral:'시급'},
+  {word:'불안해', neutral:'우려'},
+  {word:'무서워', neutral:'리스크 인식'},
+  {word:'재미없', neutral:'동기 부족'},
+  {word:'지루', neutral:'흥미 저하'},
+  {word:'짜증나', neutral:'불편'},
+  {word:'화나', neutral:'불만'},
+  {word:'절망적', neutral:'제약'},
+  {word:'조급해', neutral:'긴급'},
+  {word:'불안하다', neutral:'우려'},
+  {word:'두렵다', neutral:'리스크'},
+  {word:'답답하다', neutral:'정체'},
+  {word:'화가 나', neutral:'불만'},
+  {word:'짜증나', neutral:'비효율'},
+  {word:'절망하다', neutral:'한계'},
+  {word:'조급하다', neutral:'시급'},
+  {word:'무섭다', neutral:'리스크 인식'},
+  {word:'재미없다', neutral:'동기 부족'},
+  {word:'지루하다', neutral:'흥미 저하'},
+  {word:'짜증난다', neutral:'불편'},
+  {word:'화난다', neutral:'불만'},
+  {word:'절망적이다', neutral:'제약'},
+  {word:'조급하다', neutral:'긴급'},
+  {word:'불안해요', neutral:'우려'},
+  {word:'두려워요', neutral:'리스크'},
+  {word:'답답해요', neutral:'정체'},
+  {word:'화가 나요', neutral:'불만'},
+  {word:'짜증나요', neutral:'비효율'},
+  {word:'절망해요', neutral:'한계'},
+  {word:'조급해요', neutral:'시급'},
+  {word:'무서워요', neutral:'리스크 인식'},
+  {word:'재미없어요', neutral:'동기 부족'},
+  {word:'지루해요', neutral:'흥미 저하'},
+  {word:'짜증나요', neutral:'불편'},
+  {word:'화나요', neutral:'불만'},
+  {word:'절망적이에요', neutral:'제약'},
+  {word:'조급해요', neutral:'긴급'},
+  {word:'불안합니다', neutral:'우려'},
+  {word:'두렵습니다', neutral:'리스크'},
+  {word:'답답합니다', neutral:'정체'},
+  {word:'화가 납니다', neutral:'불만'},
+  {word:'짜증납니다', neutral:'비효율'},
+  {word:'절망합니다', neutral:'한계'},
+  {word:'조급합니다', neutral:'시급'},
+  {word:'무섭습니다', neutral:'리스크 인식'},
+  {word:'재미없습니다', neutral:'동기 부족'},
+  {word:'지루합니다', neutral:'흥미 저하'},
+  {word:'짜증납니다', neutral:'불편'},
+  {word:'화납니다', neutral:'불만'},
+  {word:'절망적입니다', neutral:'제약'},
+  {word:'조급합니다', neutral:'긴급'}
+];
+
+function selectProfile(p){
+  selectedProfile = p;
+  document.querySelectorAll('.profile-card').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`[data-profile="${p}"]`).classList.add('active');
+}
+
+function detectEmotions(text){
+  const found = [];
+  EMOTION_WORDS.forEach(e=>{
+    if(text.includes(e.word)){
+      found.push({word:e.word, neutral:e.neutral});
+    }
+  });
+  return found;
+}
+
+function solomonParadox(text){
+  const advice = text.replace(/나는|내가|나의|우리|내/gi, m=>{
+    const map = {'나는':'친구는','내가':'친구가','나의':'친구의','우리':'친구의','내':'친구의'};
+    return map[m] || m;
+  });
+  return advice;
+}
+
+function generate(){
+  const situation = document.getElementById('situation').value.trim();
+  if(!situation){
+    alert('고민 상황을 입력해주세요.');
+    return;
+  }
+
+  const profile = PROFILES[selectedProfile];
+  const emotions = detectEmotions(situation);
+  const solomon = solomonParadox(situation);
+
+  let emotionHtml = '';
+  if(emotions.length > 0){
+    emotionHtml = `<div class="emotion-alert">
+      ⚠️ <strong>감정 단어 감지:</strong> ${emotions.map(e=>`<span class="word">${e.word} → ${e.neutral}</span>`).join('')}
+      <span class="suggestion">💡 중립 표현으로 바꾸면 더 객관적인 판단이 가능합니다.</span>
+    </div>`;
+  }
+
+  const perspectives = profile.perspectives.map((p,i)=>`
+    <div class="perspective">
+      <div class="title">${profile.icon} 관점 ${i+1}: ${p.title}</div>
+      <div class="content">${p.template}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('result').innerHTML = `
+    <div class="card">
+      <h2>🪞 솔로몬의 역설 — 친구에게 조언하듯</h2>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:14px;font-size:.9rem;line-height:1.7;color:#d0d0d0">
+        "${solomon}"
+      </div>
+    </div>
+    ${emotionHtml}
+    <div class="card">
+      <h2>${profile.icon} ${profile.name}의 관점에서 재해석</h2>
+      ${perspectives}
+    </div>
+  `;
+
+  saveHistory({
+    date: new Date().toLocaleString('ko-KR'),
+    situation: situation.substring(0,100),
+    profile: profile.name,
+    emotions: emotions.length
+  });
+  renderHistory();
+}
+
+function saveHistory(record){
+  let h = JSON.parse(localStorage.getItem('rival_history')||'[]');
+  h.unshift(record);
+  if(h.length>50) h = h.slice(0,50);
+  localStorage.setItem('rival_history', JSON.stringify(h));
+}
+
+function renderHistory(){
+  const h = JSON.parse(localStorage.getItem('rival_history')||'[]');
+  const el = document.getElementById('history');
+  if(h.length===0){
+    el.innerHTML = '<div class="empty">아직 판단 기록이 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = h.map(r=>`
+    <div class="history-item">
+      <div class="date">${r.date} · ${r.profile}</div>
+      <div>${r.situation}${r.situation.length>=100?'...':''}</div>
+      ${r.emotions>0?`<div style="color:#f1c40f;font-size:.75rem;margin-top:4px">감정 단어 ${r.emotions}개 감지</div>`:''}
+    </div>
+  `).join('');
+}
+
+function clearHistory(){
+  if(confirm('모든 판단 기록을 삭제하시겠습니까?')){
+    localStorage.removeItem('rival_history');
+    renderHistory();
+  }
+}
+
+renderHistory();
+</script>
+</body>
+</html>
